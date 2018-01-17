@@ -1,7 +1,10 @@
+import random
+
 from rest_framework import serializers, fields
 from rest_framework.views import APIView
 from rest_framework.response import Response
 # Create your views here.
+from serving.models import Server, SERVER_STATES
 
 
 class BaseAPIView(APIView):
@@ -21,25 +24,33 @@ class BaseAPIView(APIView):
             print('could not find method. exiting early')
             return
         if method == 'get':
-            request_data = request.query_params
+            request_data = request.query_params.copy()
         else:
-            request_data = request.data
+            request_data = request.data.dict()
+        request_data.update(kwargs)
         validated_data = self.METHOD_SERIALIZERS[method](data=request_data)
         if validated_data.is_valid(raise_exception=True):
             self.params.update(validated_data.validated_data)
 
 
-class TestView(BaseAPIView):
+class ServerCheckinView(BaseAPIView):
 
-    class TestSerializer(serializers.Serializer):
-        my_num = fields.IntegerField(required=True)
-        my_str = fields.CharField(required=True)
-        strs = fields.ListField(child=fields.CharField())
+    class ServerUpdateStateSerializer(serializers.Serializer):
+        server = fields.RegexField(regex=r'[a-fA-F0-9]{1,32}')
+        state = fields.ChoiceField(choices=SERVER_STATES)
 
     METHOD_SERIALIZERS = {
-        'get': TestSerializer,
+        'post': ServerUpdateStateSerializer,
     }
 
     def get(self, request, *args, **kwargs):
-        print("Data is {}".format(self.params))
+        return Response({'server': self.params['server'], 'state': self.params.get('state', 'unknown')})
+
+    def post(self, request, *args, **kwargs):
+        """
+        Change the working state of a server.
+        """
+        Server.objects.update_server(server_id=self.params['server'], state=self.params['state'])
         return Response({'success': True})
+
+

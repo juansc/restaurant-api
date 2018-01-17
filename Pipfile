@@ -8,6 +8,10 @@ name = "pypi"
 [packages]
 
 django = "*"
+pytest = "*"
+djangorestframework = "*"
+pytest-django = "*"
+mysqlclient = "*"
 
 
 [dev-packages]

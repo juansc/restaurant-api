@@ -13,9 +13,16 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf.urls import url
 from django.contrib import admin
-from django.urls import path
+
+from serving.views import ServerCheckinView
+
+SERVER_ID_REGEX = r'(?P<server>[a-fA-F0-9]{1,32})'
+
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    url('admin/', admin.site.urls),
+
+    url(r'v1/server/{}/'.format(SERVER_ID_REGEX), ServerCheckinView.as_view()),
 ]
