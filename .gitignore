@@ -3,3 +3,6 @@
 
 # PYTHON Compile
 **.pyc
+
+# pytest
+.cache/
