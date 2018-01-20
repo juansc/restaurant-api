@@ -3,6 +3,7 @@
 
 # PYTHON Compile
 **.pyc
+__pycache__/
 
 # pytest
 .cache/
